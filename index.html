@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Blog System | Outdoor Adventure Stories</title>
-  <meta name="description" content="A local blog UI system that turns markdown into a beautiful, responsive hiking story website.">
-  <meta property="og:title" content="Blog System | Outdoor Adventure Stories">
-  <meta property="og:description" content="A clean Pinterest-style local blog interface powered by markdown content.">
+  <title>Blogging | Markdown Posts</title>
+  <meta name="description" content="A clean blogging homepage for markdown-powered posts.">
+  <meta property="og:title" content="Blogging | Markdown Posts">
+  <meta property="og:description" content="A simple, reusable blog interface powered by markdown content.">
   <meta property="og:type" content="website">
   <meta property="og:image" content="images/image1.jpg">
   <meta name="twitter:card" content="summary_large_image">
@@ -16,87 +16,42 @@
 <body data-page="home">
   <div class="page-shell">
     <header class="topbar">
-      <a class="brand" href="index.html" aria-label="Blog system home">
+      <a class="brand" href="index.html" aria-label="Blogging home">
         <span class="brand-mark">B</span>
         <span>
-          <strong>BlogSystem</strong>
-          <small>Markdown to Website</small>
+          <strong>Blogging</strong>
+          <small>Markdown posts</small>
         </span>
       </a>
       <nav class="topbar-actions">
         <a href="index.html" class="nav-link is-active">Home</a>
-        <a href="post.html?slug=hiking-outfit-guide-weather-layering" class="nav-link">Latest Post</a>
         <button class="theme-toggle" type="button" data-theme-toggle aria-label="Toggle theme">
-          <span class="theme-toggle-icon" aria-hidden="true">◐</span>
+          <span class="theme-toggle-icon" aria-hidden="true">T</span>
           <span data-theme-label>Light</span>
         </button>
       </nav>
     </header>
 
     <main>
-      <section class="hero">
+      <section class="hero hero-minimal">
         <div class="hero-copy">
-          <p class="eyebrow">Local Blog UI System</p>
-          <h1>Markdown turns into a polished, browser-ready blog with one file click.</h1>
+          <p class="eyebrow">Blog homepage</p>
+          <h1>Read and open markdown blog posts from one clean place.</h1>
           <p class="hero-text">
-            Clean cards, soft shadows, responsive layouts, and automatic markdown rendering built for GitHub Pages or a simple double-click launch.
+            A simple blogging layout for current and future posts. Click any card to open the full article.
           </p>
-          <div class="hero-meta">
-            <div>
-              <strong>1</strong>
-              <span>featured guide</span>
-            </div>
-            <div>
-              <strong>100%</strong>
-              <span>static frontend</span>
-            </div>
-            <div>
-              <strong>MD</strong>
-              <span>markdown support</span>
-            </div>
-          </div>
         </div>
-        <div class="hero-visual">
-          <div class="hero-card">
-            <img src="images/image1.jpg" alt="Collage of hiking outfit ideas near waterfalls, trails, and mountains" data-fallback>
-            <div class="hero-card-body">
-              <p>Featured story</p>
-              <h2>The Ultimate Hiking Outfit Guide</h2>
-              <span>Waterfalls, mountain trails, lakes, and cold-weather layering.</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="toolbar" aria-label="Blog controls">
-        <label class="search-box">
-          <span aria-hidden="true">⌕</span>
-          <input type="search" placeholder="Search posts, tags, or scenes" data-search>
-        </label>
-        <div class="filter-chips" data-filters></div>
-      </section>
-
-      <section class="visual-reel">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">Full image set</p>
-            <h2>All 12 project images are displayed here</h2>
-          </div>
-          <p>These scenes mirror the article sections and keep every uploaded image visible in the UI.</p>
-        </div>
-        <div class="reel-grid" data-story-reel></div>
       </section>
 
       <section class="section-heading">
         <div>
-          <p class="eyebrow">Blog list</p>
-          <h2>Browse the markdown-powered stories</h2>
+          <p class="eyebrow">Blog posts</p>
+          <h2>Browse and open your posts</h2>
         </div>
-        <p>Every card pulls from a markdown source and opens into a dedicated single-post view.</p>
+        <p>Each card opens a dedicated blog page. Add more markdown posts later and they will fit right in.</p>
       </section>
 
       <section class="post-grid" data-post-grid aria-live="polite"></section>
-
     </main>
   </div>
 
