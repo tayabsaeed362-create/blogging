@@ -248,6 +248,21 @@ Start with comfort, add weather protection, and finish with a look that feels tr
   }
 ];
 
+const STORY_IMAGES = [
+  { src: "images/image1.jpg", alt: "Waterfall hike outfit with waterproof layers", caption: "Waterfall hike outfit" },
+  { src: "images/image2.jpg", alt: "Cold weather hiking layers on a snowy trail", caption: "Cold weather layering" },
+  { src: "images/image3.jpg", alt: "Trail boots with strong ankle support on forest ground", caption: "Boots that support" },
+  { src: "images/image4.jpg", alt: "Hiker overlooking a mountain lake", caption: "Lake view hike" },
+  { src: "images/image5.jpg", alt: "Winter mountain hiker in layered clothing", caption: "Snow ridge outfit" },
+  { src: "images/image6.jpg", alt: "Hiker walking through a forest trail", caption: "Forest hike look" },
+  { src: "images/image7.jpg", alt: "Snowy hiking outfit in cold mountain weather", caption: "Winter trail outfit" },
+  { src: "images/image8.jpg", alt: "Summer mountain outfit on a ridge", caption: "Summer mountain outfit" },
+  { src: "images/image9.jpg", alt: "Snowy hike with wind protection", caption: "Windproof shell" },
+  { src: "images/image10.jpg", alt: "Snowy ridge hike with trekking poles", caption: "High alpine hike" },
+  { src: "images/image11.jpg", alt: "Flat lay of hiking essentials and gear", caption: "Essential gear" },
+  { src: "images/image12.jpg", alt: "Steep snowy ascent in winter hiking conditions", caption: "Steep ascent" },
+];
+
 const PLACEHOLDER_IMAGE = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-label="Image unavailable">
     <defs>
@@ -317,14 +332,55 @@ async function renderHome() {
   const posts = await loadPosts();
   cachedPosts = posts;
   const grid = document.querySelector("[data-post-grid]");
+  const search = document.querySelector("[data-search]");
+  const filters = document.querySelector("[data-filters]");
+  const reel = document.querySelector("[data-story-reel]");
 
   if (!grid) return;
 
-  grid.innerHTML = posts.length
-    ? posts.map(renderPostCard).join("")
-    : `<div class="empty-state">No blog posts are available yet.</div>`;
+  const categories = ["All", ...new Set(posts.map((post) => post.category).filter(Boolean))];
+  let activeCategory = "All";
 
-  attachImageFallbacks(grid);
+  filters.innerHTML = categories.map((category, index) => `
+    <button class="chip ${index === 0 ? "is-active" : ""}" type="button" data-filter="${escapeHtml(category)}">${escapeHtml(category)}</button>
+  `).join("");
+
+  filters.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-filter]");
+    if (!button) return;
+    activeCategory = button.dataset.filter;
+    filters.querySelectorAll(".chip").forEach((chip) => chip.classList.toggle("is-active", chip === button));
+    updateHomeGrid();
+  });
+
+  search?.addEventListener("input", updateHomeGrid);
+  updateHomeGrid();
+
+  if (reel) {
+    reel.innerHTML = STORY_IMAGES.map((image) => `
+      <figure class="reel-card">
+        <img src="${escapeHtml(image.src)}" alt="${escapeHtml(image.alt)}" loading="lazy" data-fallback>
+        <figcaption>${escapeHtml(image.caption)}</figcaption>
+      </figure>
+    `).join("");
+    attachImageFallbacks(reel);
+  }
+
+  function updateHomeGrid() {
+    const query = (search?.value || "").trim().toLowerCase();
+    const filtered = posts.filter((post) => {
+      const matchesCategory = activeCategory === "All" || post.category === activeCategory;
+      const haystack = [post.title, post.description, post.category, ...(post.tags || [])].join(" ").toLowerCase();
+      const matchesSearch = !query || haystack.includes(query);
+      return matchesCategory && matchesSearch;
+    });
+
+    grid.innerHTML = filtered.length
+      ? filtered.map(renderPostCard).join("")
+      : `<div class="empty-state">No posts match your search. Try a different keyword or category.</div>`;
+
+    attachImageFallbacks(grid);
+  }
 }
 
 async function renderPost() {
@@ -357,6 +413,23 @@ async function renderPost() {
     <div class="post-body" id="${articleId}">
       ${parsed.html}
     </div>
+    <section class="story-gallery" aria-label="Visual gallery">
+      <div class="section-heading gallery-heading">
+        <div>
+          <p class="eyebrow">Visual guide</p>
+          <h2>All 12 hiking images in one place</h2>
+        </div>
+        <p>Every image from the project is surfaced here so the full set stays part of the story.</p>
+      </div>
+      <div class="gallery-grid" data-story-gallery>
+        ${STORY_IMAGES.map((image) => `
+          <figure class="gallery-card">
+            <img src="${escapeHtml(image.src)}" alt="${escapeHtml(image.alt)}" loading="lazy" data-fallback>
+            <figcaption>${escapeHtml(image.caption)}</figcaption>
+          </figure>
+        `).join("")}
+      </div>
+    </section>
   `;
 
   buildToc(toc, parsed.headings, articleId);
@@ -398,7 +471,7 @@ function buildToc(container, headings, articleId) {
 function updateSeo(post, meta) {
   const title = meta.seoTitle || post.seoTitle || post.title;
   const description = meta.description || post.description || "";
-  document.title = `${title} | Blogging`;
+  document.title = `${title} | BlogSystem`;
   updateMeta("description", description);
   updateMeta("og:title", title, "property");
   updateMeta("og:description", description, "property");

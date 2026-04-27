@@ -174,10 +174,6 @@ input {
   margin-bottom: 26px;
 }
 
-.hero-minimal {
-  grid-template-columns: 1fr;
-}
-
 .hero-copy,
 .hero-visual,
 .toolbar,
@@ -198,10 +194,6 @@ input {
   display: flex;
   flex-direction: column;
   justify-content: center;
-}
-
-.hero-minimal .hero-copy {
-  max-width: 760px;
 }
 
 .eyebrow {
