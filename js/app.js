@@ -471,7 +471,7 @@ function buildToc(container, headings, articleId) {
 function updateSeo(post, meta) {
   const title = meta.seoTitle || post.seoTitle || post.title;
   const description = meta.description || post.description || "";
-  document.title = `${title} | BlogSystem`;
+  document.title = `${title} | Frost & Fashion`;
   updateMeta("description", description);
   updateMeta("og:title", title, "property");
   updateMeta("og:description", description, "property");
