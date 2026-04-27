@@ -286,6 +286,7 @@ let cachedPosts = null;
 
 document.addEventListener("DOMContentLoaded", () => {
   initTheme();
+  initImageLightbox();
   bindThemeToggle();
   const page = document.body.dataset.page;
 
@@ -359,7 +360,7 @@ async function renderHome() {
   if (reel) {
     reel.innerHTML = STORY_IMAGES.map((image) => `
       <figure class="reel-card">
-        <img src="${escapeHtml(image.src)}" alt="${escapeHtml(image.alt)}" loading="lazy" data-fallback>
+        <img src="${escapeHtml(image.src)}" alt="${escapeHtml(image.alt)}" loading="lazy" data-fallback data-zoomable="true" data-caption="${escapeHtml(image.caption)}">
         <figcaption>${escapeHtml(image.caption)}</figcaption>
       </figure>
     `).join("");
@@ -404,7 +405,7 @@ async function renderPost() {
         <span>${escapeHtml(post.category || "Guide")}</span>
       </div>
       <div class="post-banner">
-        <img src="${escapeHtml(post.coverImage)}" alt="${escapeHtml(post.title)}" data-fallback>
+        <img src="${escapeHtml(post.coverImage)}" alt="${escapeHtml(post.title)}" data-fallback data-zoomable="true" data-caption="${escapeHtml(post.title)}">
       </div>
     </div>
     <div class="post-intro">
@@ -424,7 +425,7 @@ async function renderPost() {
       <div class="gallery-grid" data-story-gallery>
         ${STORY_IMAGES.map((image) => `
           <figure class="gallery-card">
-            <img src="${escapeHtml(image.src)}" alt="${escapeHtml(image.alt)}" loading="lazy" data-fallback>
+            <img src="${escapeHtml(image.src)}" alt="${escapeHtml(image.alt)}" loading="lazy" data-fallback data-zoomable="true" data-caption="${escapeHtml(image.caption)}">
             <figcaption>${escapeHtml(image.caption)}</figcaption>
           </figure>
         `).join("")}
@@ -605,7 +606,7 @@ function parseMarkdown(markdown) {
       flushList();
       html.push(`
         <figure class="article-figure">
-          <img src="${escapeHtml(normalizeImagePath(imageMatch[2]))}" alt="${escapeHtml(imageMatch[1])}" loading="lazy" data-fallback>
+          <img src="${escapeHtml(normalizeImagePath(imageMatch[2]))}" alt="${escapeHtml(imageMatch[1])}" loading="lazy" data-fallback data-zoomable="true" data-caption="${escapeHtml(imageMatch[1])}">
           <figcaption>${escapeHtml(imageMatch[1])}</figcaption>
         </figure>
       `);
@@ -730,6 +731,122 @@ function attachImageFallbacks(scope) {
       image.classList.add("is-fallback");
     }, { once: true });
   });
+}
+
+function initImageLightbox() {
+  if (document.getElementById("image-lightbox")) return;
+
+  const modal = document.createElement("div");
+  modal.id = "image-lightbox";
+  modal.className = "image-lightbox";
+  modal.setAttribute("aria-hidden", "true");
+  modal.innerHTML = `
+    <div class="image-lightbox__backdrop" data-lightbox-close></div>
+    <div class="image-lightbox__panel" role="dialog" aria-modal="true" aria-label="Image preview">
+      <button class="image-lightbox__close" type="button" data-lightbox-close aria-label="Close image preview">×</button>
+      <img class="image-lightbox__image" data-lightbox-image alt="">
+      <div class="image-lightbox__footer">
+        <p class="image-lightbox__caption" data-lightbox-caption></p>
+        <button class="image-lightbox__download" type="button" data-lightbox-download>Download image</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  const image = modal.querySelector("[data-lightbox-image]");
+  const caption = modal.querySelector("[data-lightbox-caption]");
+  const download = modal.querySelector("[data-lightbox-download]");
+  const closeTargets = modal.querySelectorAll("[data-lightbox-close]");
+  let lastTrigger = null;
+
+  const closeLightbox = () => {
+    modal.classList.remove("is-open");
+    modal.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("has-lightbox-open");
+    if (lastTrigger && typeof lastTrigger.focus === "function") {
+      lastTrigger.focus();
+    }
+    lastTrigger = null;
+  };
+
+  const openLightbox = (trigger) => {
+    const src = trigger.currentSrc || trigger.src;
+    image.src = src;
+    image.alt = trigger.alt || "Preview image";
+    caption.textContent = trigger.dataset.caption || trigger.alt || "";
+    modal.classList.add("is-open");
+    modal.setAttribute("aria-hidden", "false");
+    document.body.classList.add("has-lightbox-open");
+    lastTrigger = trigger;
+    window.setTimeout(() => {
+      modal.querySelector(".image-lightbox__close")?.focus();
+    }, 0);
+  };
+
+  document.addEventListener("click", (event) => {
+    const trigger = event.target.closest("img[data-zoomable]");
+    if (!trigger) return;
+    event.preventDefault();
+    openLightbox(trigger);
+  });
+
+  closeTargets.forEach((target) => {
+    target.addEventListener("click", closeLightbox);
+  });
+
+  download.addEventListener("click", async () => {
+    try {
+      await downloadLightboxImage(image, image.alt || "image");
+    } catch (error) {
+      console.error(error);
+      const fallbackLink = document.createElement("a");
+      fallbackLink.href = image.src;
+      fallbackLink.download = `${slugify(image.alt || "image") || "image"}.jpg`;
+      document.body.appendChild(fallbackLink);
+      fallbackLink.click();
+      fallbackLink.remove();
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && modal.classList.contains("is-open")) {
+      closeLightbox();
+    }
+  });
+}
+
+async function downloadLightboxImage(img, altText) {
+  const fileName = `${slugify(altText || "image") || "image"}.jpg`;
+  const blob = await renderImageToBlob(img);
+  if (!blob) {
+    throw new Error("Unable to prepare image download");
+  }
+
+  const blobUrl = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = blobUrl;
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+}
+
+async function renderImageToBlob(img) {
+  if (typeof img.decode === "function" && !img.complete) {
+    await img.decode();
+  }
+
+  const canvas = document.createElement("canvas");
+  canvas.width = img.naturalWidth || img.width;
+  canvas.height = img.naturalHeight || img.height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(img, 0, 0);
+
+  return await new Promise((resolve) => canvas.toBlob((blob) => resolve(blob), "image/jpeg", 0.92));
 }
 
 function showHomeError() {

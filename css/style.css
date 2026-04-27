@@ -67,6 +67,10 @@ img {
   display: block;
 }
 
+img[data-zoomable] {
+  cursor: zoom-in;
+}
+
 a {
   color: inherit;
   text-decoration: none;
@@ -620,6 +624,89 @@ input {
   font-size: 0.92rem;
 }
 
+.image-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: none;
+}
+
+.image-lightbox.is-open {
+  display: block;
+}
+
+.image-lightbox__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 12, 14, 0.78);
+  backdrop-filter: blur(10px);
+}
+
+.image-lightbox__panel {
+  position: relative;
+  z-index: 1;
+  width: min(92vw, 1100px);
+  height: min(88vh, 920px);
+  margin: 5vh auto 0;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 28px;
+  background: rgba(12, 16, 18, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.4);
+}
+
+.image-lightbox__image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.image-lightbox__close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 42px;
+  height: 42px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
+  font-size: 1.8rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.image-lightbox__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: white;
+}
+
+.image-lightbox__caption {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.image-lightbox__download {
+  flex: 0 0 auto;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: white;
+  color: #111;
+  font-weight: 600;
+}
+
+body.has-lightbox-open {
+  overflow: hidden;
+}
+
 .story-gallery {
   padding: 0 34px 34px;
 }
@@ -760,5 +847,16 @@ input {
   .sidebar-card,
   .post-card {
     border-radius: 22px;
+  }
+
+  .image-lightbox__panel {
+    width: min(94vw, 1100px);
+    height: min(84vh, 920px);
+    margin-top: 8vh;
+  }
+
+  .image-lightbox__footer {
+    flex-direction: column;
+    align-items: stretch;
   }
 }
